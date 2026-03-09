@@ -126,12 +126,12 @@ class ClutchMasterScraper:
         self.all_categories = ALL_CATEGORIES
         logger.info(f"🚀 Master Scraper initialized with {len(self.all_categories)} categories")
     
-    def scrape_category(self, category, max_pages=3):
+    def scrape_category(self, category, max_pages=3, scrape_profiles=False):
         """
         Scrape a single category
         """
         logger.info(f"📊 Scraping category: {category}")
-        return scrape_category(category, max_pages)
+        return scrape_category(category, max_pages, scrape_profiles)
     
     def scrape_main_directory(self, max_pages=5):
         """
@@ -140,20 +140,21 @@ class ClutchMasterScraper:
         logger.info(f"📚 Scraping main directory")
         return scrape_main_directory(max_pages)
     
-    def scrape_all_categories(self, categories_to_scrape=None, pages_per_category=2):
+    def scrape_all_categories(self, categories_to_scrape=None, pages_per_category=2, scrape_profiles=False):
         """
         Scrape multiple categories and return combined results
-        
+
         Args:
             categories_to_scrape: List of category keys to scrape (None = all)
             pages_per_category: Number of pages to scrape per category
-        
+            scrape_profiles: Whether to scrape individual company profiles
+
         Returns:
             Dictionary with results
         """
         if categories_to_scrape is None:
             categories_to_scrape = list(self.all_categories.keys())
-        
+
         results = {
             'companies': [],
             'companies_by_category': {},
@@ -161,31 +162,33 @@ class ClutchMasterScraper:
             'total_companies': 0,
             'errors': []
         }
-        
+
         total_categories = len(categories_to_scrape)
-        logger.info(f"🎯 Starting master scrape of {total_categories} categories")
-        
+        logger.info(f"🎯 Starting master scrape of {total_categories} categories (profile scraping: {scrape_profiles})")
+
         for idx, category in enumerate(categories_to_scrape, 1):
             try:
-                logger.info(f"[{idx}/{total_categories}] Scraping: {self.all_categories.get(category, category)}")
-                
-                companies = self.scrape_category(category, max_pages=pages_per_category)
-                
+                category_name = self.all_categories.get(category, category)
+                logger.info(f"[{idx}/{total_categories}] Scraping: {category_name}")
+
+                # Pass scrape_profiles to scrape_category
+                companies = self.scrape_category(category, max_pages=pages_per_category, scrape_profiles=scrape_profiles)
+
                 results['companies'].extend(companies)
                 results['companies_by_category'][category] = companies
                 results['categories_scraped'] += 1
                 results['total_companies'] += len(companies)
-                
+
                 logger.info(f"✅ Found {len(companies)} companies in {category}")
-                
+
                 # Be nice to the server
                 time.sleep(2)
-                
+
             except Exception as e:
                 error_msg = f"Error scraping {category}: {str(e)}"
                 logger.error(error_msg)
                 results['errors'].append(error_msg)
-        
+
         logger.info(f"🎉 Master scrape complete! Total companies: {results['total_companies']}")
         return results
 
