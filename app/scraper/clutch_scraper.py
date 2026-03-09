@@ -22,6 +22,28 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+
+# In the scrape_category function, replace the Cloudflare handling section:
+
+# Handle Cloudflare with multiple retries
+max_retries = 3
+for attempt in range(max_retries):
+    page_source = driver.page_source.lower()
+    if "just a moment" in page_source or "cloudflare" in page_source:
+        logger.info(f"⏳ Cloudflare detected (attempt {attempt+1}/{max_retries}), waiting 15 seconds...")
+        time.sleep(15)
+        driver.refresh()
+        time.sleep(10)
+    else:
+        break
+
+# After loop, check if still blocked
+if "just a moment" in driver.page_source.lower():
+    logger.warning("⚠️ Still blocked by Cloudflare after multiple attempts.")
+    # Try to get cookies or solve challenge
+    input("Please solve the Cloudflare challenge manually in the browser, then press Enter...")
+
 # ============== HELPER FUNCTIONS ==============
 
 def setup_driver():
@@ -670,13 +692,40 @@ def scrape_category(category, max_pages=5, scrape_profiles=False):
         driver.get(base_url)
         time.sleep(5)
         
-        # Handle Cloudflare
-        page_source = driver.page_source.lower()
-        if "just a moment" in page_source or "cloudflare" in page_source:
-            logger.info("⏳ Cloudflare detected, waiting 10 seconds...")
-            time.sleep(10)
+        # ========== ENHANCED CLOUDFLARE HANDLING ==========
+        max_retries = 3
+        cloudflare_bypassed = False
+        
+        for attempt in range(max_retries):
+            page_source = driver.page_source.lower()
+            
+            # Check if we're past Cloudflare
+            if "just a moment" not in page_source and "cloudflare" not in page_source and "checking your browser" not in page_source:
+                cloudflare_bypassed = True
+                logger.info(f"✅ Cloudflare bypassed on attempt {attempt+1}")
+                break
+            
+            logger.info(f"⏳ Cloudflare detected (attempt {attempt+1}/{max_retries}), waiting {15 + attempt*5} seconds...")
+            time.sleep(15 + attempt*5)  # Progressive wait: 15s, 20s, 25s
+            
+            # Try refreshing the page
+            logger.info(f"🔄 Refreshing page...")
             driver.refresh()
-            time.sleep(5)
+            time.sleep(10)
+        
+        if not cloudflare_bypassed:
+            logger.warning("⚠️ Still blocked by Cloudflare after multiple attempts.")
+            # Try one more approach - navigate to a different page and come back
+            logger.info("🔄 Trying alternate approach: visiting homepage first...")
+            driver.get("https://clutch.co")
+            time.sleep(10)
+            driver.get(base_url)
+            time.sleep(10)
+            
+            # Final check
+            if "just a moment" in driver.page_source.lower():
+                logger.error("❌ Cannot bypass Cloudflare. Skipping this category.")
+                return []
         
         # Check if page exists
         if "page not found" in driver.page_source.lower() or "404" in driver.title:
@@ -749,69 +798,6 @@ def scrape_category(category, max_pages=5, scrape_profiles=False):
         
     except Exception as e:
         logger.error(f"Error in scrape_category: {e}")
-        return []
-        
-    finally:
-        if driver:
-            driver.quit()
-            logger.info("Browser closed")
-
-def scrape_main_directory(max_pages=5):
-    """Scrape ALL companies from the main directory"""
-    all_companies = []
-    driver = None
-    
-    try:
-        driver = setup_driver()
-        
-        base_url = "https://clutch.co/developers"
-        logger.info(f"📚 Scraping MAIN DIRECTORY: {base_url}")
-        
-        driver.get(base_url)
-        time.sleep(5)
-        
-        # Handle Cloudflare
-        page_source = driver.page_source.lower()
-        if "just a moment" in page_source or "cloudflare" in page_source:
-            logger.info("⏳ Anti-bot detected, waiting 10 seconds...")
-            time.sleep(10)
-            driver.refresh()
-            time.sleep(5)
-            
-            if "just a moment" in driver.page_source.lower():
-                logger.warning("⚠️ Still blocked by Cloudflare. Try again later.")
-                return []
-        
-        # Page 1
-        companies = extract_companies_from_page(driver, 1, limit=50)
-        all_companies.extend(companies)
-        logger.info(f"📊 Page 1: Found {len(companies)} companies")
-        
-        # More pages
-        if len(companies) > 0 and max_pages > 1:
-            for page_num in range(2, max_pages + 1):
-                try:
-                    next_url = f"{base_url}?page={page_num}"
-                    logger.info(f"📄 Navigating to page {page_num}")
-                    
-                    driver.get(next_url)
-                    time.sleep(3)
-                    
-                    companies = extract_companies_from_page(driver, page_num, limit=50)
-                    all_companies.extend(companies)
-                    logger.info(f"📊 Page {page_num}: Found {len(companies)} companies")
-                    
-                    time.sleep(2)
-                    
-                except Exception as e:
-                    logger.error(f"Error on page {page_num}: {e}")
-                    break
-        
-        logger.info(f"✅ Total companies from main directory: {len(all_companies)}")
-        return all_companies
-        
-    except Exception as e:
-        logger.error(f"Error in scrape_main_directory: {e}")
         return []
         
     finally:
