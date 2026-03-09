@@ -26,23 +26,6 @@ logger = logging.getLogger(__name__)
 
 # In the scrape_category function, replace the Cloudflare handling section:
 
-# Handle Cloudflare with multiple retries
-max_retries = 3
-for attempt in range(max_retries):
-    page_source = driver.page_source.lower()
-    if "just a moment" in page_source or "cloudflare" in page_source:
-        logger.info(f"⏳ Cloudflare detected (attempt {attempt+1}/{max_retries}), waiting 15 seconds...")
-        time.sleep(15)
-        driver.refresh()
-        time.sleep(10)
-    else:
-        break
-
-# After loop, check if still blocked
-if "just a moment" in driver.page_source.lower():
-    logger.warning("⚠️ Still blocked by Cloudflare after multiple attempts.")
-    # Try to get cookies or solve challenge
-    input("Please solve the Cloudflare challenge manually in the browser, then press Enter...")
 
 # ============== HELPER FUNCTIONS ==============
 
