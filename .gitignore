@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Uploads
+uploads/
+media/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Exports
+*.csv
+*.xlsx
+*.xls
+outreach_list_*.csv
+
+# Render specific
+render.yaml

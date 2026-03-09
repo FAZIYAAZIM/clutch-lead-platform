@@ -1,0 +1,575 @@
+{
+  "total_companies": 30,
+  "categories_scraped": 1,
+  "companies_by_category": {
+    "artificial-intelligence": 30
+  },
+  "scraped_at": "2026-03-09T00:59:16.035427",
+  "companies": [
+    {
+      "name": "TechnoYuga Soft Pvt. Ltd.",
+      "website": "Not available",
+      "location": "New Delhi, India",
+      "rating": "5.064",
+      "reviews": "5",
+      "hourly_rate": "< $25 / hr",
+      "employees": "50 - 249",
+      "services": [
+        "SERVICES PROVIDED",
+        "40% AI Development",
+        "40% Custom Software Development",
+        "20% Mobile App Development"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Simform",
+      "website": "Not available",
+      "location": "Orlando, FL",
+      "rating": "4.882",
+      "reviews": "4",
+      "hourly_rate": "$25 - $49 / hr",
+      "employees": "1,000 - 9,999",
+      "services": [
+        "SERVICES PROVIDED",
+        "10% AI Development",
+        "10% CRM Consulting and SI",
+        "10% Cloud Consulting & SI",
+        "+7 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Vention",
+      "website": "Not available",
+      "location": "New York, NY",
+      "rating": "4.998",
+      "reviews": "4",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "1,000 - 9,999",
+      "services": [
+        "SERVICES PROVIDED",
+        "10% AI Agents",
+        "10% AI Development",
+        "10% Application Testing",
+        "+7 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Azumo",
+      "website": "Not available",
+      "location": "San Francisco, CA",
+      "rating": "4.921",
+      "reviews": "4",
+      "hourly_rate": "$25 - $49 / hr",
+      "employees": "50 - 249",
+      "services": [
+        "SERVICES PROVIDED",
+        "30% AI Development",
+        "30% Custom Software Development",
+        "15% BI & Big Data Consulting & SI",
+        "+2 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Goji Labs",
+      "website": "Not available",
+      "location": "Los Angeles, CA",
+      "rating": "5.084",
+      "reviews": "5",
+      "hourly_rate": "$100 - $149 / hr",
+      "employees": "50 - 249",
+      "services": [
+        "SERVICES PROVIDED",
+        "40% Custom Software Development",
+        "20% Mobile App Development",
+        "20% UX/UI Design",
+        "+2 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Imaginovation",
+      "website": "Not available",
+      "location": "Raleigh, NC",
+      "rating": "4.915",
+      "reviews": "4",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "10 - 49",
+      "services": [
+        "SERVICES PROVIDED",
+        "25% AI Development",
+        "25% Custom Software Development",
+        "25% Mobile App Development",
+        "+1 service"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "STX Next",
+      "website": "Not available",
+      "location": "Poznań, Poland",
+      "rating": "4.7101",
+      "reviews": "4",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "250 - 999",
+      "services": [
+        "SERVICES PROVIDED",
+        "55% AI Development",
+        "35% Web Development",
+        "10% Generative AI"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "HatchWorks AI",
+      "website": "Not available",
+      "location": "Atlanta, GA",
+      "rating": "4.929",
+      "reviews": "4",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "250 - 999",
+      "services": [
+        "SERVICES PROVIDED",
+        "40% AI Consulting",
+        "40% AI Development",
+        "10% Custom Software Development",
+        "+1 service"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Intuz",
+      "website": "Not available",
+      "location": "San Ramon, CA",
+      "rating": "4.852",
+      "reviews": "4",
+      "hourly_rate": "$25 - $49 / hr",
+      "employees": "50 - 249",
+      "services": [
+        "SERVICES PROVIDED",
+        "60% AI Development",
+        "25% AI Agents",
+        "15% Custom Software Development"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Tooploox",
+      "website": "Not available",
+      "location": "Wrocław, Poland",
+      "rating": "4.835",
+      "reviews": "4",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "50 - 249",
+      "services": [
+        "SERVICES PROVIDED",
+        "40% AI Development",
+        "10% AI Consulting",
+        "10% Custom Software Development",
+        "+4 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Hexaware Technologies",
+      "website": "Not available",
+      "location": "Navi Mumbai, India",
+      "rating": "Not rated",
+      "reviews": "0",
+      "hourly_rate": "Undisclosed",
+      "employees": "10,000+",
+      "services": [
+        "SERVICES PROVIDED",
+        "10% Cloud Consulting & SI",
+        "10% IT Managed Services",
+        "10% IT Strategy Consulting",
+        "+14 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "DataRoot Labs",
+      "website": "Not available",
+      "location": "Kyiv, Ukraine",
+      "rating": "4.922",
+      "reviews": "4",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "10 - 49",
+      "services": [
+        "SERVICES PROVIDED",
+        "30% AI Development",
+        "20% AI Agents",
+        "20% Generative AI",
+        "+3 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "GeekyAnts",
+      "website": "Not available",
+      "location": "San Francisco, CA",
+      "rating": "4.8112",
+      "reviews": "4",
+      "hourly_rate": "$25 - $49 / hr",
+      "employees": "250 - 999",
+      "services": [
+        "SERVICES PROVIDED",
+        "25% Custom Software Development",
+        "25% Mobile App Development",
+        "15% AI Development",
+        "+3 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "deepsense.ai",
+      "website": "Not available",
+      "location": "Warszawa, Poland",
+      "rating": "5.07",
+      "reviews": "5",
+      "hourly_rate": "$100 - $149 / hr",
+      "employees": "50 - 249",
+      "services": [
+        "SERVICES PROVIDED",
+        "55% AI Development",
+        "25% AI Consulting",
+        "15% AI Agents",
+        "+1 service"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Quytech",
+      "website": "Not available",
+      "location": "Gurugram, India",
+      "rating": "4.8130",
+      "reviews": "4",
+      "hourly_rate": "< $25 / hr",
+      "employees": "250 - 999",
+      "services": [
+        "SERVICES PROVIDED",
+        "40% AI Development",
+        "30% Mobile App Development",
+        "10% AR/VR Development",
+        "+2 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "AscentCore",
+      "website": "Not available",
+      "location": "Cluj-Napoca, Romania",
+      "rating": "4.815",
+      "reviews": "4",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "50 - 249",
+      "services": [
+        "SERVICES PROVIDED",
+        "50% AI Development",
+        "25% Custom Software Development",
+        "15% Mobile App Development",
+        "+1 service"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "DATAFOREST",
+      "website": "Not available",
+      "location": "Kyiv, Ukraine",
+      "rating": "5.027",
+      "reviews": "5",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "50 - 249",
+      "services": [
+        "SERVICES PROVIDED",
+        "30% AI Development",
+        "30% BI & Big Data Consulting & SI",
+        "10% AI Consulting",
+        "+5 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Andersen Inc.",
+      "website": "Not available",
+      "location": "Warszawa, Poland",
+      "rating": "4.9129",
+      "reviews": "4",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "1,000 - 9,999",
+      "services": [
+        "SERVICES PROVIDED",
+        "20% Custom Software Development",
+        "15% IT Managed Services",
+        "15% Mobile App Development",
+        "+6 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Future Processing",
+      "website": "Not available",
+      "location": "Gliwice, Poland",
+      "rating": "4.751",
+      "reviews": "4",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "250 - 999",
+      "services": [
+        "SERVICES PROVIDED",
+        "45% Custom Software Development",
+        "25% Cloud Consulting & SI",
+        "10% AI Development",
+        "+2 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "SoftKraft",
+      "website": "Not available",
+      "location": "Bielsko-Biała, Poland",
+      "rating": "4.924",
+      "reviews": "4",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "10 - 49",
+      "services": [
+        "SERVICES PROVIDED",
+        "30% Custom Software Development",
+        "20% AI Development",
+        "20% Cloud Consulting & SI",
+        "+2 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "NineTwoThree AI Studio",
+      "website": "Not available",
+      "location": "Danvers, MA",
+      "rating": "4.940",
+      "reviews": "4",
+      "hourly_rate": "$100 - $149 / hr",
+      "employees": "50 - 249",
+      "services": [
+        "SERVICES PROVIDED",
+        "65% AI Development",
+        "15% Generative AI",
+        "10% AI Agents",
+        "+1 service"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "fxis.ai",
+      "website": "Not available",
+      "location": "Ahmedabad, India",
+      "rating": "4.964",
+      "reviews": "4",
+      "hourly_rate": "$25 - $49 / hr",
+      "employees": "50 - 249",
+      "services": [
+        "SERVICES PROVIDED",
+        "70% AI Development",
+        "30% Custom Software Development"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Deviniti",
+      "website": "Not available",
+      "location": "Wrocław, Poland",
+      "rating": "5.045",
+      "reviews": "5",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "250 - 999",
+      "services": [
+        "SERVICES PROVIDED",
+        "40% Generative AI",
+        "20% AI Consulting",
+        "20% AI Development",
+        "+2 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Valletta.Software: AI-Care",
+      "website": "Not available",
+      "location": "San Ġiljan, Malta",
+      "rating": "4.948",
+      "reviews": "4",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "250 - 999",
+      "services": [
+        "SERVICES PROVIDED",
+        "25% AI Agents",
+        "25% AI Development",
+        "20% IT Staff Augmentation",
+        "+3 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "InData Labs",
+      "website": "Not available",
+      "location": "Vilnius, Lithuania",
+      "rating": "4.920",
+      "reviews": "4",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "50 - 249",
+      "services": [
+        "SERVICES PROVIDED",
+        "55% AI Development",
+        "20% BI & Big Data Consulting & SI",
+        "15% Generative AI",
+        "+2 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Software Mind S.A.",
+      "website": "Not available",
+      "location": "Kraków, Poland",
+      "rating": "4.958",
+      "reviews": "4",
+      "hourly_rate": "$50 - $99 / hr",
+      "employees": "1,000 - 9,999",
+      "services": [
+        "SERVICES PROVIDED",
+        "15% Cloud Consulting & SI",
+        "15% Custom Software Development",
+        "15% Cybersecurity",
+        "+4 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Krazimo",
+      "website": "Not available",
+      "location": "Bengaluru, India",
+      "rating": "5.09",
+      "reviews": "5",
+      "hourly_rate": "$100 - $149 / hr",
+      "employees": "10 - 49",
+      "services": [
+        "SERVICES PROVIDED",
+        "35% AI Development",
+        "25% Generative AI",
+        "10% AI Consulting",
+        "+3 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Linnify",
+      "website": "Not available",
+      "location": "Cluj-Napoca, Romania",
+      "rating": "5.042",
+      "reviews": "5",
+      "hourly_rate": "$100 - $149 / hr",
+      "employees": "10 - 49",
+      "services": [
+        "SERVICES PROVIDED",
+        "50% AI Agents",
+        "15% Custom Software Development",
+        "10% AI Development",
+        "+3 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Anadea",
+      "website": "Not available",
+      "location": "Alicante (Alacant), Spain",
+      "rating": "4.835",
+      "reviews": "4",
+      "hourly_rate": "$25 - $49 / hr",
+      "employees": "50 - 249",
+      "services": [
+        "SERVICES PROVIDED",
+        "15% AI Development",
+        "10% AI Consulting",
+        "10% Custom Software Development",
+        "+7 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    },
+    {
+      "name": "Muteki Group",
+      "website": "Not available",
+      "location": "Gdańsk, Poland",
+      "rating": "5.020",
+      "reviews": "5",
+      "hourly_rate": "$25 - $49 / hr",
+      "employees": "50 - 249",
+      "services": [
+        "SERVICES PROVIDED",
+        "30% AI Development",
+        "20% Mobile App Development",
+        "10% AI Consulting",
+        "+7 services"
+      ],
+      "source": "Clutch.co",
+      "scraped_category": "artificial-intelligence",
+      "category_name": "Artificial Intelligence"
+    }
+  ]
+}
