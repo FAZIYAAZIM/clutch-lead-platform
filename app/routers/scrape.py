@@ -328,26 +328,32 @@ class ClutchCategory(str, Enum):
 # Category display names - using the imported CATEGORY_NAMES from master_scraper
 # This ensures consistency across files
 
-# ============== MASTER SCRAPER ENDPOINT ==============
-
-def run_master_scrape_background(categories, pages_per_category, save_to_db):
+def run_master_scrape_background(categories, pages_per_category, scrape_profiles, save_to_db):
     """Background task for master scrape"""
     try:
         scraper = ClutchMasterScraper()
         results = scraper.scrape_all_categories(
             categories_to_scrape=categories,
-            pages_per_category=pages_per_category
+            pages_per_category=pages_per_category,
+            scrape_profiles=scrape_profiles  # Pass the parameter
         )
-        
+
         if save_to_db and results['companies']:
             for category, cat_companies in results['companies_by_category'].items():
                 if cat_companies:
                     db_service.save_leads(cat_companies, category)
         
+        # Log contact stats if profiles were scraped
+        if scrape_profiles and results['companies']:
+            with_phone = sum(1 for c in results['companies'] if c.get('phone') and c['phone'] != 'Not available')
+            with_email = sum(1 for c in results['companies'] if c.get('email') and c['email'] != 'Not available')
+            with_linkedin = sum(1 for c in results['companies'] if c.get('linkedin') and c['linkedin'] != 'Not available')
+            
+            logger.info(f"📊 Contact stats: {with_phone} phones, {with_email} emails, {with_linkedin} LinkedIn")
+        
         logger.info(f"✅ Background master scrape complete: {results['total_companies']} companies")
     except Exception as e:
         logger.error(f"Background master scrape failed: {e}")
-
 # ============== SINGLE CATEGORY SCRAPER ==============
 
 @router.get("/clutch")
