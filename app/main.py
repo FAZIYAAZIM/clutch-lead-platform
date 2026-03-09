@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import auth, scrape, outreach, dashboard
 from app.core.database import Base, engine
 from app.models import user, lead  # Import lead model
+import os
+import uvicorn
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -119,3 +121,8 @@ def root():
         },
         "note": "📌 For complete API documentation with interactive testing, visit /docs"
     }
+
+# ✅ CRITICAL: Add this for Render deployment
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)
