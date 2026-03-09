@@ -1,4 +1,3 @@
-from turtle import pd
 import pandas as pd
 from fastapi import APIRouter, Query, HTTPException, BackgroundTasks
 from fastapi.responses import Response, JSONResponse
