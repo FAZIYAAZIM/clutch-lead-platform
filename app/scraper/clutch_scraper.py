@@ -1,14 +1,23 @@
 import time
 import logging
 import re
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
+
+# Try to import webdriver-manager, but don't fail if not available
+try:
+    from webdriver_manager.chrome import ChromeDriverManager
+    WEBDRIVER_MANAGER_AVAILABLE = True
+except ImportError:
+    WEBDRIVER_MANAGER_AVAILABLE = False
+    logger = logging.getLogger(__name__)
+    logger.warning("webdriver-manager not installed. Using system ChromeDriver only.")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -16,21 +25,89 @@ logger = logging.getLogger(__name__)
 # ============== HELPER FUNCTIONS ==============
 
 def setup_driver():
-    """Setup Chrome driver with options"""
+    """Setup Chrome driver with options for production (works on Render and local)"""
     options = Options()
+    
+    # Basic options
     options.add_argument('--window-size=1280,800')
     options.add_argument('--disable-blink-features=AutomationControlled')
-    options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36')
+    options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
     
-    # Add these options to help with Cloudflare
-    options.add_argument('--disable-gpu')
+    # Critical for server environments (Render, Docker, etc.)
+    options.add_argument('--headless=new')  # Use new headless mode
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--disable-software-rasterizer')
+    options.add_argument('--disable-extensions')
+    options.add_argument('--disable-setuid-sandbox')
+    options.add_argument('--remote-debugging-port=9222')  # Helpful for debugging
     
-    # Remove any references to Service or ChromeDriverManager
-    # Let Selenium handle the driver automatically
-    driver = webdriver.Chrome(options=options)
-    return driver
+    # Additional stability options
+    options.add_argument('--disable-web-security')
+    options.add_argument('--ignore-certificate-errors')
+    options.add_argument('--allow-running-insecure-content')
+    
+    # Performance options
+    options.add_argument('--disable-logging')
+    options.add_argument('--log-level=3')  # Fatal only
+    options.add_argument('--silent')
+    
+    # Exclude switches that might trigger detection
+    options.add_experimental_option('excludeSwitches', ['enable-logging', 'enable-automation'])
+    options.add_experimental_option('useAutomationExtension', False)
+    
+    # Try multiple methods to create driver
+    driver = None
+    errors = []
+    
+    # Method 1: Let Selenium manage the driver automatically (Selenium 4.6+)
+    try:
+        logger.info("Attempting to create driver with automatic Selenium Manager...")
+        driver = webdriver.Chrome(options=options)
+        logger.info("✅ Driver created successfully with Selenium Manager")
+        return driver
+    except WebDriverException as e:
+        errors.append(f"Selenium Manager failed: {str(e)[:100]}")
+        logger.warning(f"Selenium Manager failed: {e}")
+    
+    # Method 2: Try with webdriver-manager if available
+    if WEBDRIVER_MANAGER_AVAILABLE:
+        try:
+            logger.info("Attempting to create driver with webdriver-manager...")
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
+            logger.info("✅ Driver created successfully with webdriver-manager")
+            return driver
+        except Exception as e:
+            errors.append(f"webdriver-manager failed: {str(e)[:100]}")
+            logger.warning(f"webdriver-manager failed: {e}")
+    
+    # Method 3: Try common ChromeDriver paths
+    common_paths = [
+        '/usr/local/bin/chromedriver',
+        '/usr/bin/chromedriver',
+        './chromedriver',
+        'chromedriver.exe',
+        r'C:\chromedriver.exe',
+        r'C:\Windows\chromedriver.exe',
+    ]
+    
+    for chromedriver_path in common_paths:
+        if os.path.exists(chromedriver_path):
+            try:
+                logger.info(f"Attempting to create driver with ChromeDriver at: {chromedriver_path}")
+                service = Service(chromedriver_path)
+                driver = webdriver.Chrome(service=service, options=options)
+                logger.info(f"✅ Driver created successfully with ChromeDriver at {chromedriver_path}")
+                return driver
+            except Exception as e:
+                errors.append(f"Path {chromedriver_path} failed: {str(e)[:100]}")
+                continue
+    
+    # If all methods fail, raise detailed error
+    error_msg = "\n".join(errors)
+    raise Exception(f"All ChromeDriver creation methods failed:\n{error_msg}")
 
 def extract_company_data(element):
     """Extract all data from a single company element"""
@@ -79,8 +156,6 @@ def extract_company_data(element):
             except:
                 result['profile_url'] = None
         
-        # ... rest of your existing extraction code ...
-        
         # ========== WEBSITE ==========
         try:
             website_elem = element.find_element(By.XPATH, './/a[contains(@href, "http") and not(contains(@href, "clutch.co"))]')
@@ -110,7 +185,6 @@ def extract_company_data(element):
             result['facebook'] = 'Not available'
         
         # ========== PHONE / CONTACT NUMBER ==========
-        # Try multiple methods to find contact numbers
         phone_found = False
         
         # Method 1: Look for tel: links
@@ -126,10 +200,7 @@ def extract_company_data(element):
         # Method 2: Look for phone in text (pattern matching)
         if not phone_found:
             try:
-                # Look for elements containing phone-like text
                 all_text = element.text
-                import re
-                # US/Canada phone patterns: (123) 456-7890, 123-456-7890, 123.456.7890, +1 123 456 7890
                 phone_patterns = [
                     r'\(\d{3}\)\s*\d{3}[-.]?\d{4}',  # (123) 456-7890
                     r'\+\d{1,2}\s*\(\d{3}\)\s*\d{3}[-.]?\d{4}',  # +1 (123) 456-7890
@@ -143,15 +214,6 @@ def extract_company_data(element):
                         result['phone'] = phone_match.group()
                         phone_found = True
                         break
-            except:
-                pass
-        
-        # Method 3: Look for "Contact" button/link that might reveal phone
-        if not phone_found:
-            try:
-                contact_btn = element.find_element(By.XPATH, './/button[contains(text(), "Contact") or contains(text(), "contact")]')
-                # Can't get phone from button directly, but flag for enrichment
-                result['has_contact_btn'] = True
             except:
                 pass
         
@@ -169,7 +231,6 @@ def extract_company_data(element):
         try:
             rating_elem = element.find_element(By.XPATH, './/*[contains(@class, "rating") or contains(@class, "star-rating")]')
             rating = rating_elem.text.strip()
-            import re
             rating_match = re.search(r'(\d+\.?\d*)', rating)
             result['rating'] = rating_match.group(1) if rating_match else 'Not rated'
         except:
@@ -212,11 +273,7 @@ def extract_company_data(element):
                 else:
                     result['size_category'] = 'Enterprise'
             else:
-                # Check for text like "10-50 employees"
-                if "employee" in employees.lower():
-                    result['size_category'] = 'Unknown'
-                else:
-                    result['size_category'] = 'Unknown'
+                result['size_category'] = 'Unknown'
         except:
             result['employees'] = 'Unknown'
             result['size_category'] = 'Unknown'
@@ -225,14 +282,13 @@ def extract_company_data(element):
         try:
             service_elem = element.find_element(By.XPATH, './/*[contains(@class, "services") or contains(@class, "focus-areas") or contains(@class, "specialties")]')
             service_text = service_elem.text.strip()
-            # Split by common separators
             services = []
             for s in service_text.split('\n'):
                 if s.strip():
                     services.append(s.strip())
             if not services:
                 services = ['Not specified']
-            result['services'] = services[:10]  # Limit to 10 services
+            result['services'] = services[:10]
         except:
             result['services'] = ['Not specified']
         
@@ -261,7 +317,6 @@ def extract_company_data(element):
             result['email'] = 'Not available'
         
         # ========== CONTACT INFO SUMMARY ==========
-        # Add a field that combines contact info
         contact_info = []
         if result.get('phone') and result['phone'] != 'Not available':
             contact_info.append(f"Phone: {result['phone']}")
@@ -271,8 +326,6 @@ def extract_company_data(element):
             contact_info.append("LinkedIn available")
         
         result['contact_summary'] = ' | '.join(contact_info) if contact_info else 'No contact info'
-        
-        # ========== SOURCE ==========
         result['source'] = 'Clutch.co'
         
     except Exception as e:
@@ -281,10 +334,10 @@ def extract_company_data(element):
     
     return result
 
-
-def scrape_company_profile_enhanced(profile_url, driver):
+def scrape_company_profile(profile_url, driver):
     """
-    Enhanced profile scraping with more data points
+    Scrape detailed information from a company's profile page
+    Returns phone, email, and social media links
     """
     company_details = {
         'phone': 'Not available',
@@ -292,28 +345,21 @@ def scrape_company_profile_enhanced(profile_url, driver):
         'linkedin': 'Not available',
         'twitter': 'Not available',
         'facebook': 'Not available',
-        'instagram': 'Not available',
-        'youtube': 'Not available',
         'website': 'Not available',
         'founded_year': 'Unknown',
-        'employees': 'Unknown',
-        'headquarters': 'Unknown',
-        'services_offered': [],
-        'clients': [],
-        'awards': []
+        'headquarters': 'Unknown'
     }
     
     try:
-        logger.info(f"🔍 Enhanced profile scrape: {profile_url}")
+        logger.info(f"🔍 Scraping profile: {profile_url}")
         driver.get(profile_url)
         time.sleep(3)
         
-        # ========== PHONE (Multiple methods) ==========
+        # ========== PHONE NUMBER ==========
         phone_selectors = [
             '//a[starts-with(@href, "tel:")]',
             '//span[contains(@class, "phone")]',
             '//div[contains(@class, "phone")]',
-            '//li[contains(@class, "phone")]',
             '//*[contains(text(), "Tel:")]/following-sibling::*',
             '//*[contains(text(), "Phone:")]/following-sibling::*'
         ]
@@ -333,12 +379,29 @@ def scrape_company_profile_enhanced(profile_url, driver):
             except:
                 continue
         
-        # ========== EMAIL (Multiple methods) ==========
+        if company_details['phone'] == 'Not available':
+            try:
+                page_text = driver.find_element(By.TAG_NAME, 'body').text
+                phone_patterns = [
+                    r'\(\d{3}\)\s*\d{3}[-.]?\d{4}',
+                    r'\+\d{1,2}\s*\(\d{3}\)\s*\d{3}[-.]?\d{4}',
+                    r'\d{3}[-.]\d{3}[-.]\d{4}',
+                    r'\+\d{1,2}\s*\d{3}\s*\d{3}\s*\d{4}'
+                ]
+                for pattern in phone_patterns:
+                    phone_match = re.search(pattern, page_text)
+                    if phone_match:
+                        company_details['phone'] = phone_match.group()
+                        logger.info(f"📞 Found phone from text: {company_details['phone']}")
+                        break
+            except:
+                pass
+        
+        # ========== EMAIL ==========
         email_selectors = [
             '//a[starts-with(@href, "mailto:")]',
             '//span[contains(@class, "email")]',
             '//div[contains(@class, "email")]',
-            '//li[contains(@class, "email")]',
             '//*[contains(text(), "Email:")]/following-sibling::*'
         ]
         
@@ -357,13 +420,22 @@ def scrape_company_profile_enhanced(profile_url, driver):
             except:
                 continue
         
-        # ========== SOCIAL MEDIA (All platforms) ==========
+        if company_details['email'] == 'Not available':
+            try:
+                page_text = driver.find_element(By.TAG_NAME, 'body').text
+                email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+                email_match = re.search(email_pattern, page_text)
+                if email_match:
+                    company_details['email'] = email_match.group()
+                    logger.info(f"📧 Found email from text: {company_details['email']}")
+            except:
+                pass
+        
+        # ========== SOCIAL MEDIA ==========
         social_patterns = {
-            'linkedin': 'linkedin.com',
+            'linkedin': 'linkedin.com/company',
             'twitter': ['twitter.com', 'x.com'],
-            'facebook': 'facebook.com',
-            'instagram': 'instagram.com',
-            'youtube': 'youtube.com'
+            'facebook': 'facebook.com'
         }
         
         all_links = driver.find_elements(By.XPATH, '//a[@href]')
@@ -412,140 +484,10 @@ def scrape_company_profile_enhanced(profile_url, driver):
         except:
             pass
         
-        # ========== CLIENTS/AWARDS ==========
-        page_text = driver.find_element(By.TAG_NAME, 'body').text.lower()
-        if 'client' in page_text:
-            # Extract client names (simplified)
-            pass
-        
-        if 'award' in page_text or 'recognized' in page_text:
-            company_details['awards'] = ['Industry recognition found']
-        
-    except Exception as e:
-        logger.error(f"Enhanced profile scrape error: {e}")
-    
-    return company_details
-
-
-
-def scrape_company_profile(profile_url, driver):
-    """
-    Scrape detailed information from a company's profile page
-    Returns phone, email, and social media links
-    """
-    company_details = {
-        'phone': 'Not available',
-        'email': 'Not available',
-        'linkedin': 'Not available',
-        'twitter': 'Not available',
-        'facebook': 'Not available',
-        'website': 'Not available'
-    }
-    
-    try:
-        logger.info(f"🔍 Scraping profile: {profile_url}")
-        driver.get(profile_url)
-        time.sleep(3)
-        
-        # ========== PHONE NUMBER ==========
-        try:
-            # Method 1: Look for tel: links
-            phone_elem = driver.find_element(By.XPATH, '//a[starts-with(@href, "tel:")]')
-            if phone_elem:
-                phone = phone_elem.get_attribute('href').replace('tel:', '').strip()
-                if phone:
-                    company_details['phone'] = phone
-                    logger.info(f"📞 Found phone: {phone}")
-        except:
-            pass
-        
-        if company_details['phone'] == 'Not available':
-            try:
-                # Method 2: Look for phone in text with pattern matching
-                page_text = driver.find_element(By.TAG_NAME, 'body').text
-                phone_patterns = [
-                    r'\(\d{3}\)\s*\d{3}[-.]?\d{4}',  # (123) 456-7890
-                    r'\+\d{1,2}\s*\(\d{3}\)\s*\d{3}[-.]?\d{4}',  # +1 (123) 456-7890
-                    r'\d{3}[-.]\d{3}[-.]\d{4}',  # 123-456-7890
-                    r'\+\d{1,2}\s*\d{3}\s*\d{3}\s*\d{4}'  # +1 123 456 7890
-                ]
-                for pattern in phone_patterns:
-                    phone_match = re.search(pattern, page_text)
-                    if phone_match:
-                        company_details['phone'] = phone_match.group()
-                        logger.info(f"📞 Found phone from text: {company_details['phone']}")
-                        break
-            except:
-                pass
-        
-        # ========== EMAIL ==========
-        try:
-            # Method 1: Look for mailto: links
-            email_elem = driver.find_element(By.XPATH, '//a[starts-with(@href, "mailto:")]')
-            if email_elem:
-                email = email_elem.get_attribute('href').replace('mailto:', '').strip()
-                if email:
-                    company_details['email'] = email
-                    logger.info(f"📧 Found email: {email}")
-        except:
-            pass
-        
-        if company_details['email'] == 'Not available':
-            try:
-                # Method 2: Look for email pattern in text
-                page_text = driver.find_element(By.TAG_NAME, 'body').text
-                email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
-                email_match = re.search(email_pattern, page_text)
-                if email_match:
-                    company_details['email'] = email_match.group()
-                    logger.info(f"📧 Found email from text: {company_details['email']}")
-            except:
-                pass
-        
-        # ========== LINKEDIN ==========
-        try:
-            linkedin_elem = driver.find_element(By.XPATH, '//a[contains(@href, "linkedin.com/company")]')
-            if linkedin_elem:
-                company_details['linkedin'] = linkedin_elem.get_attribute('href')
-                logger.info(f"🔗 Found LinkedIn: {company_details['linkedin']}")
-        except:
-            pass
-        
-        # ========== TWITTER ==========
-        try:
-            twitter_elem = driver.find_element(By.XPATH, '//a[contains(@href, "twitter.com") or contains(@href, "x.com")]')
-            if twitter_elem:
-                company_details['twitter'] = twitter_elem.get_attribute('href')
-                logger.info(f"🐦 Found Twitter: {company_details['twitter']}")
-        except:
-            pass
-        
-        # ========== FACEBOOK ==========
-        try:
-            fb_elem = driver.find_element(By.XPATH, '//a[contains(@href, "facebook.com")]')
-            if fb_elem:
-                company_details['facebook'] = fb_elem.get_attribute('href')
-                logger.info(f"📘 Found Facebook: {company_details['facebook']}")
-        except:
-            pass
-        
-        # ========== WEBSITE ==========
-        try:
-            website_elem = driver.find_element(By.XPATH, '//a[contains(@href, "http") and not(contains(@href, "clutch.co")) and not(contains(@href, "linkedin")) and not(contains(@href, "twitter")) and not(contains(@href, "facebook"))]')
-            if website_elem:
-                company_details['website'] = website_elem.get_attribute('href')
-                logger.info(f"🌐 Found website: {company_details['website']}")
-        except:
-            pass
-        
     except Exception as e:
         logger.error(f"Error scraping profile {profile_url}: {e}")
     
     return company_details
-
-
-
-
 
 def extract_companies_from_page(driver, page_num, limit=50):
     """Extract company data from current page"""
@@ -569,7 +511,7 @@ def extract_companies_from_page(driver, page_num, limit=50):
         'li.provider',
         'div.provider-row',
         'div.list-item',
-        'a[href*="/profile/"]'  # Sometimes each profile link is a company
+        'a[href*="/profile/"]'
     ]
     
     for selector in selectors:
@@ -579,7 +521,6 @@ def extract_companies_from_page(driver, page_num, limit=50):
             break
     
     if not elements:
-        # Try XPath as last resort
         elements = driver.find_elements(By.XPATH, '//div[contains(@class, "company") or contains(@class, "provider")]')
     
     logger.info(f"🔍 Found {len(elements)} potential company elements on page {page_num}")
@@ -594,17 +535,13 @@ def extract_companies_from_page(driver, page_num, limit=50):
             continue
     
     return companies
+
 # ============== MAIN SCRAPING FUNCTIONS ==============
 
 def scrape_category(category, max_pages=5, scrape_profiles=False):
     """
     Scrape companies from a specific category
     Example: scrape_category("artificial-intelligence", 3, scrape_profiles=True)
-    
-    Args:
-        category: Category slug to scrape
-        max_pages: Number of pages to scrape
-        scrape_profiles: If True, visit each company's profile page to get contact info
     """
     all_companies = []
     driver = None
@@ -612,9 +549,9 @@ def scrape_category(category, max_pages=5, scrape_profiles=False):
     try:
         driver = setup_driver()
         
-        # CORRECT URL MAPPINGS based on debug results
+        # URL MAPPINGS
         url_mappings = {
-            # Development (all work under /developers/)
+            # Development
             "artificial-intelligence": "developers",
             "blockchain": "developers",
             "web-developers": "developers",
@@ -648,7 +585,7 @@ def scrape_category(category, max_pages=5, scrape_profiles=False):
             "woocommerce": "developers",
             
             # IT Services
-            "cybersecurity": "it-services",  # ✅ Works!
+            "cybersecurity": "it-services",
             "cloud-consulting": "it-services",
             "bi-and-big-data": "it-services",
             "it-support": "it-services",
@@ -662,19 +599,19 @@ def scrape_category(category, max_pages=5, scrape_profiles=False):
             "managed-service-providers": "it-services",
             "account-takeover-prevention": "it-services",
             
-            # Design - Need to verify these
-            "web-design": "design",  # Might need different naming
+            # Design
+            "web-design": "design",
             "user-experience": "design",
             "product-design": "design",
             "graphic-design": "design",
             "logo-design": "design",
             "digital-design": "design",
             "packaging-design": "design",
-            "design-agencies": "design",  # This might be wrong
+            "design-agencies": "design",
             "design-concepts": "design",
             "full-service-design": "design",
             
-            # Marketing - Need to verify these
+            # Marketing
             "digital-marketing": "marketing",
             "seo": "marketing",
             "ppc": "marketing",
@@ -697,7 +634,7 @@ def scrape_category(category, max_pages=5, scrape_profiles=False):
             "3d-animation": "marketing",
             "motion-graphics": "marketing",
             
-            # Business Services - Need to verify these
+            # Business Services
             "hr-consulting": "business-services",
             "accounting": "business-services",
             "legal": "business-services",
@@ -722,7 +659,7 @@ def scrape_category(category, max_pages=5, scrape_profiles=False):
             "executive-search": "business-services"
         }
         
-        # Get the correct path from mapping, default to developers
+        # Get the correct path from mapping
         path = url_mappings.get(category, "developers")
         base_url = f"https://clutch.co/{path}/{category}"
         
@@ -749,16 +686,15 @@ def scrape_category(category, max_pages=5, scrape_profiles=False):
         # Page 1
         companies = extract_companies_from_page(driver, 1)
         
-        # If profile scraping is enabled, scrape each company's profile
+        # Scrape profiles if enabled
         if scrape_profiles and companies:
             logger.info(f"🔍 Scraping profiles for {len(companies)} companies on page 1...")
             for i, company in enumerate(companies):
                 if company.get('profile_url'):
                     logger.info(f"   [{i+1}/{len(companies)}] Scraping profile for {company.get('name', 'Unknown')}")
                     profile_details = scrape_company_profile(company['profile_url'], driver)
-                    # Update company with profile details
                     company.update(profile_details)
-                    time.sleep(2)  # Be nice to the server
+                    time.sleep(2)
                 else:
                     logger.warning(f"   ⚠️ No profile URL for {company.get('name', 'Unknown')}")
         
@@ -777,7 +713,6 @@ def scrape_category(category, max_pages=5, scrape_profiles=False):
                     
                     page_companies = extract_companies_from_page(driver, page_num)
                     
-                    # Scrape profiles for this page if enabled
                     if scrape_profiles and page_companies:
                         logger.info(f"🔍 Scraping profiles for {len(page_companies)} companies on page {page_num}...")
                         for i, company in enumerate(page_companies):
@@ -821,18 +756,8 @@ def scrape_category(category, max_pages=5, scrape_profiles=False):
             driver.quit()
             logger.info("Browser closed")
 
-# ============== BACKWARD COMPATIBILITY ==============
-# Keep old function names for compatibility
-scrape_clutch = scrape_category  # Alias for old code
-
-
-
-
 def scrape_main_directory(max_pages=5):
-    """
-    Scrape ALL companies from the main directory
-    This gets companies from ALL categories
-    """
+    """Scrape ALL companies from the main directory"""
     all_companies = []
     driver = None
     
@@ -845,15 +770,14 @@ def scrape_main_directory(max_pages=5):
         driver.get(base_url)
         time.sleep(5)
         
-        # Handle Cloudflare/anti-bot
+        # Handle Cloudflare
         page_source = driver.page_source.lower()
-        if "just a moment" in page_source or "cloudflare" in page_source or "captcha" in page_source:
+        if "just a moment" in page_source or "cloudflare" in page_source:
             logger.info("⏳ Anti-bot detected, waiting 10 seconds...")
             time.sleep(10)
             driver.refresh()
             time.sleep(5)
             
-            # Check if still blocked
             if "just a moment" in driver.page_source.lower():
                 logger.warning("⚠️ Still blocked by Cloudflare. Try again later.")
                 return []
@@ -895,6 +819,9 @@ def scrape_main_directory(max_pages=5):
             driver.quit()
             logger.info("Browser closed")
 
+# Alias for backward compatibility
+scrape_clutch = scrape_category
+
 # ============== TEST FUNCTION ==============
 if __name__ == "__main__":
     print("=" * 60)
@@ -903,7 +830,7 @@ if __name__ == "__main__":
     
     # Test category scrape
     print("\n📊 Testing category scrape (artificial-intelligence):")
-    companies = scrape_category("artificial-intelligence", max_pages=2)
+    companies = scrape_category("artificial-intelligence", max_pages=1, scrape_profiles=False)
     print(f"✅ Found {len(companies)} companies")
     
     if companies:
